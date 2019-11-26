@@ -88,9 +88,7 @@ func decode(b []byte) (PacketType, PacketMessage, error) {
 
 // Packet is used to wrap incoming network packets from peers
 // over a packet connection. Addtionally it provides Meta data about
-// the packet. Message is the network packets payload, FromAddr is the
-// address of the remote peer, and Timestamp is local timestamp of when the
-// packet was created/recieved
+// the packet.
 type Packet struct {
 	msg       PacketMessage
 	fromAddr  net.Addr
