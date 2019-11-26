@@ -1,6 +1,8 @@
 # Hacket
 Golang Packet Handlers for net.PacketConn 
 
+[![GoDoc](https://godoc.org/github.com/elewis787/hacket?status.svg)](https://godoc.org/github.com/elewis787/hacket)
+
 ### TODO 
 - background 
 - cleanup of shutdown 
