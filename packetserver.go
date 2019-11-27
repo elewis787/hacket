@@ -50,7 +50,7 @@ func (ps *udpPacketServerImpl) Serve(handler PacketHandler) error {
 	} else if ps.conn == nil {
 		return ErrMissingPacketConn
 	}
-	// Continously listen/process packets
+	// Continuously listen/process packets
 	for {
 		// If at concurrency limit do not try to read from connection yet
 		ps.concurrencyLimit <- struct{}{}
@@ -115,7 +115,7 @@ func (ps *udpPacketServerImpl) Shutdown(ctx context.Context) error {
 	}
 }
 
-// incrimentWaitGroup incriments the waitgroup after checking that shutdown has not yet been called
+// incrimentWaitGroup increments the waitgroup after checking that shutdown has not yet been called
 // If shutdown is set return false without incrimenting
 func (ps *udpPacketServerImpl) incrimentWaitGroup() bool {
 	ps.mu.Lock()

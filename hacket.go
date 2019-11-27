@@ -4,7 +4,7 @@ import (
 	"net"
 )
 
-// New initalizes a packet server and a packet client
+// New initializes a packet server and a packet client
 func New(network string, address string, options ...Options) (PacketServer, PacketClient, error) {
 	// Setup the connection based on the network protocol
 	switch network {
