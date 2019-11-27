@@ -28,7 +28,7 @@ type PacketMessageBuilder struct {
 	pktType *PacketType
 }
 
-// NewPacketMessageBuilder initalizes a new PacketMessageBuilder with b
+// NewPacketMessageBuilder initializes a new PacketMessageBuilder with b
 // If b is nil the PacketMessage Builder will throw an error during the build call.
 func NewPacketMessageBuilder(b []byte) *PacketMessageBuilder {
 	return &PacketMessageBuilder{m: b}
@@ -87,7 +87,7 @@ func decode(b []byte) (PacketType, PacketMessage, error) {
 }
 
 // Packet is used to wrap incoming network packets from peers
-// over a packet connection. Addtionally it provides Meta data about
+// over a packet connection. Additionally it provides Meta data about
 // the packet.
 type Packet struct {
 	msg       PacketMessage

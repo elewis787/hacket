@@ -56,7 +56,7 @@ type PacketMux struct {
 	m  map[PacketType]packetMuxEntry
 }
 
-// NewPacketMux initalizes a PacketMux
+// NewPacketMux initializes a PacketMux
 func NewPacketMux() *PacketMux {
 	return new(PacketMux)
 }

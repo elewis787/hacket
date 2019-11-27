@@ -16,12 +16,9 @@ func TestShutdownRace(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error creating new server and client:", err)
 	}
-
 	delayType := PacketType(1)
-
 	mux := NewPacketMux()
 	mux.PacketHandlerFunc(delayType, delayHandler)
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -31,12 +28,10 @@ func TestShutdownRace(t *testing.T) {
 			t.Log("Server ended with error:", err)
 		}
 	}()
-
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		t.Fatal("Error resolving udp addr:", err)
 	}
-
 	// Write 2 messages to be handled in delayHandler
 	// Due to concurrency limit of 1 the first message will be processing while the second waits before starting
 	wg.Add(1)
@@ -52,16 +47,13 @@ func TestShutdownRace(t *testing.T) {
 			}
 		}
 	}()
-
 	// Sleep a bit to allow client to send the messages
 	time.Sleep(time.Millisecond * 10)
-
 	// Try to shutdown server
 	err = server.Shutdown(context.TODO())
 	if err != nil {
 		t.Fatal("Error during shutdown:", err)
 	}
-
 	wg.Wait()
 }
 
@@ -72,12 +64,9 @@ func TestShutdownContext(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error creating new server and client:", err)
 	}
-
 	delayType := PacketType(1)
-
 	mux := NewPacketMux()
 	mux.PacketHandlerFunc(delayType, delayHandler)
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -87,12 +76,10 @@ func TestShutdownContext(t *testing.T) {
 			t.Log("Server ended with error:", err)
 		}
 	}()
-
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		t.Fatal("Error resolving udp addr:", err)
 	}
-
 	// Write 2 messages to be handled in delayHandler
 	// Due to concurrency limit of 1 the first message will be processing while the second waits before starting
 	wg.Add(1)
@@ -108,19 +95,15 @@ func TestShutdownContext(t *testing.T) {
 			}
 		}
 	}()
-
 	// Sleep a bit to allow client to send the messages
 	time.Sleep(time.Millisecond * 10)
-
 	// Try to shutdown server
 	ctx, cancel := context.WithCancel(context.Background())
-
 	// Cancel context in 100 milliseconds
 	go func() {
 		time.Sleep(time.Millisecond * 100)
 		cancel()
 	}()
-
 	// Shutdown
 	err = server.Shutdown(ctx)
 	if err != nil {
@@ -130,7 +113,6 @@ func TestShutdownContext(t *testing.T) {
 	} else {
 		t.Fatal("Expected context cancel error, received none")
 	}
-
 	wg.Wait()
 }
 
