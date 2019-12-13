@@ -9,7 +9,7 @@ import (
 const (
 	// udpPacketBufSize is used to buffer incoming packets during read
 	// operations.
-	udpPacketBufSize = 65535 // (8 byte UDP Header - 20 Byte IP Header = 65507)
+	udpPacketBufSize = 65506 // (sizeof(IP Header) + sizeof(UDP Header) + sizeof(hacket header)) = 65535-(20+8+1) = 65506
 )
 
 // PacketMessage is a custom byte slice used to create a network packet
