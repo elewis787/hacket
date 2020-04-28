@@ -5,6 +5,7 @@ Golang Packet Handlers for net.PacketConn
 [![Go Report Card](https://goreportcard.com/badge/github.com/elewis787/hacket)](https://goreportcard.com/report/github.com/elewis787/hacket)
 
 ### TODO 
+- Test CI 
 - background 
 - cleanup of shutdown 
 - cleanup docs 
