@@ -16,6 +16,7 @@ func (b *atomicBool) setTrue()    { atomic.StoreInt32((*int32)(b), 1) }
 
 // PacketServer interface used to describe a packet server.
 type PacketServer interface {
+	Port() (int, error)
 	Serve(handler PacketHandler) error
 	Shutdown(ctx context.Context) error
 }
@@ -29,7 +30,6 @@ type udpPacketServerImpl struct {
 	shutdown         atomicBool
 	mu               sync.Mutex
 	concurrencyLimit chan struct{}
-	wg               sync.WaitGroup
 }
 
 // newUDPPacketServer creates a Packet Server that is configured for UDP
@@ -39,6 +39,18 @@ func newUDPPacketServer(conn *net.UDPConn, options *packetOptions) PacketServer 
 		options:          options,
 		concurrencyLimit: make(chan struct{}, options.ConcurrencyLimit),
 	}
+}
+
+//Port returns the port
+// Can be used to find out the real port if helve is started with
+// port 0 to auto bind
+func (ps *udpPacketServerImpl) Port() (int, error) {
+	if ps.conn == nil {
+		return 0, ErrNilConn
+	}
+	// We made sure there's at least one UDP listener, and that one's
+	// port was applied to all the others for the dynamic bind case.
+	return ps.conn.LocalAddr().(*net.UDPAddr).Port, nil
 }
 
 // Serve starts a Packet server
@@ -55,14 +67,13 @@ func (ps *udpPacketServerImpl) Serve(handler PacketHandler) error {
 		// If at concurrency limit do not try to read from connection yet
 		ps.concurrencyLimit <- struct{}{}
 
-		// Try to incriment Wait Group, returns false if shutdown was already called
-		if !ps.incrimentWaitGroup() {
+		if ps.shutdown.isSet() {
 			<-ps.concurrencyLimit
 			return ErrPacketServiceShutdown
 		}
 
-		if ps.options.ReadDealine > 0 {
-			deadline := time.Now().Add(ps.options.ReadDealine)
+		if ps.options.ReadDeadline > 0 {
+			deadline := time.Now().Add(ps.options.ReadDeadline)
 			if err := ps.conn.SetReadDeadline(deadline); err != nil {
 				log.Println(err)
 			}
@@ -72,13 +83,10 @@ func (ps *udpPacketServerImpl) Serve(handler PacketHandler) error {
 		if err != nil {
 			// log.Println("Error reading from udp socket", err)
 			<-ps.concurrencyLimit
-			ps.wg.Done()
 
 			if ps.shutdown.isSet() {
-				ps.conn.Close()
 				return ErrPacketServiceShutdown
 			}
-
 			continue
 		}
 
@@ -87,11 +95,9 @@ func (ps *udpPacketServerImpl) Serve(handler PacketHandler) error {
 		if n < 1 {
 			// log.Println("Invalid packet received, packet size must be greater than zero")
 			<-ps.concurrencyLimit
-			ps.wg.Done()
 			continue
 		}
 		go func() {
-			defer ps.wg.Done()
 			// Form a packet and handle through a registered handler function
 			handler.HandlePacket(NewPacket(buf[:n], rAddr, ts), &hacketPacketWriter{ps.conn, ps.options})
 			<-ps.concurrencyLimit
@@ -103,10 +109,13 @@ func (ps *udpPacketServerImpl) Serve(handler PacketHandler) error {
 // sets shutdown so that new messages will not be read
 // Can end early by closing context.
 func (ps *udpPacketServerImpl) Shutdown(ctx context.Context) error {
-	ps.mu.Lock()
+	// Mark server as shutdown
 	ps.shutdown.setTrue()
-	ps.mu.Unlock()
 
+	// Close connection to stop reading new messages
+	ps.conn.Close()
+
+	// Wait for handlers to finish or context to be done
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -115,28 +124,15 @@ func (ps *udpPacketServerImpl) Shutdown(ctx context.Context) error {
 	}
 }
 
-// incrimentWaitGroup increments the waitgroup after checking that shutdown has not yet been called
-// If shutdown is set return false without incrimenting
-func (ps *udpPacketServerImpl) incrimentWaitGroup() bool {
-	ps.mu.Lock()
-	defer ps.mu.Unlock()
-
-	if ps.shutdown.isSet() {
-		return false
-	}
-
-	ps.wg.Add(1)
-	return true
-}
-
-// waitForHandlers calls Wait on the waitgroup and closes returned channel when finished
+// waitForHandlers pushes to the concurrency limit channel until
+// full to ensure that no more handlers are processing
 func (ps *udpPacketServerImpl) waitForHandlers() <-chan struct{} {
-	wgDone := make(chan struct{})
-
+	handlersDone := make(chan struct{})
 	go func() {
-		ps.wg.Wait()
-		close(wgDone)
+		for i := uint32(0); i < ps.options.ConcurrencyLimit; i++ {
+			ps.concurrencyLimit <- struct{}{}
+		}
+		close(handlersDone)
 	}()
-
-	return wgDone
+	return handlersDone
 }

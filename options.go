@@ -7,7 +7,7 @@ type packetOptions struct {
 	WriteBufferSize  int
 	ReadBufferSize   int
 	WriteDeadline    time.Duration
-	ReadDealine      time.Duration
+	ReadDeadline     time.Duration
 	ConcurrencyLimit uint32
 }
 
@@ -60,7 +60,7 @@ func WithWriteDeadline(t time.Duration) Options {
 // WithReadDeadline duration until conn's read deadline is triggered
 func WithReadDeadline(t time.Duration) Options {
 	return newFuncPacketOption(func(o *packetOptions) {
-		o.ReadDealine = t
+		o.ReadDeadline = t
 	})
 }
 
@@ -76,7 +76,7 @@ func defaultPacketOption() *packetOptions {
 		ReadBufferSize:   0, // use go upd socket size default
 		WriteBufferSize:  0, // use go udp socket size default
 		WriteDeadline:    0, // no deadline by default
-		ReadDealine:      0, // no deadline by default
+		ReadDeadline:     0, // no deadline by default
 		ConcurrencyLimit: 1, // process one packet at a time
 	}
 }

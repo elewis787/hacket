@@ -29,4 +29,7 @@ var (
 
 	//ErrByteWrite unable to write all of the bytes to the supplied packet
 	ErrByteWrite = errors.New("failed to write all bytes to packet")
+
+	//ErrNilConn is returned when trying to use the server with a nil connection
+	ErrNilConn = errors.New("no packet connection")
 )
