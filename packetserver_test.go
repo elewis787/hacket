@@ -23,10 +23,7 @@ func TestShutdownRace(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := server.Serve(mux)
-		if err != nil {
-			t.Log("Server ended with error:", err)
-		}
+		_ = server.Serve(mux)
 	}()
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
@@ -38,13 +35,9 @@ func TestShutdownRace(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 2; i++ {
-			msg, err := NewPacketMessageBuilder([]byte{5}).WithPacketType(delayType).Build()
-			if err != nil {
-				t.Fatal("Error building message:", err)
-			}
-			if _, err := client.WriteTo(msg, udpAddr); err != nil {
-				t.Fatalf("Error during message %d WriteTo: $%v", i, err)
-			}
+			msg, _ := NewPacketMessageBuilder([]byte{5}).WithPacketType(delayType).Build()
+			_, _ = client.WriteTo(msg, udpAddr)
+
 		}
 	}()
 	// Sleep a bit to allow client to send the messages
@@ -71,10 +64,7 @@ func TestShutdownContext(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := server.Serve(mux)
-		if err != nil {
-			t.Log("Server ended with error:", err)
-		}
+		_ = server.Serve(mux)
 	}()
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
@@ -86,13 +76,8 @@ func TestShutdownContext(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 2; i++ {
-			msg, err := NewPacketMessageBuilder([]byte{5}).WithPacketType(delayType).Build()
-			if err != nil {
-				t.Fatal("Error building message:", err)
-			}
-			if _, err := client.WriteTo(msg, udpAddr); err != nil {
-				t.Fatalf("Error during message %d WriteTo: $%v", i, err)
-			}
+			msg, _ := NewPacketMessageBuilder([]byte{5}).WithPacketType(delayType).Build()
+			_, _ = client.WriteTo(msg, udpAddr)
 		}
 	}()
 	// Sleep a bit to allow client to send the messages
