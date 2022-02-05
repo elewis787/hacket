@@ -1,19 +1,3 @@
-# Hacket
-Golang Packet Handlers for net.PacketConn 
-
-[![GoDoc](https://godoc.org/github.com/elewis787/hacket?status.svg)](https://godoc.org/github.com/elewis787/hacket)
-[![Go Report Card](https://goreportcard.com/badge/github.com/elewis787/hacket)](https://goreportcard.com/report/github.com/elewis787/hacket)
-
-### TODO 
-- Test CI 
-- background 
-- cleanup of shutdown 
-- cleanup docs 
-- extend examples 
-- add additional implementations
-
-#### Ping/Pong Example 
-```go
 package main
 
 import (
@@ -115,5 +99,3 @@ func main() {
 	<-ctx.Done()
 	cancel()
 }
-
-```
