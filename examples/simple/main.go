@@ -16,10 +16,10 @@ const (
 
 func main() {
 	// Setup Ping Service
-	options := []hacket.Options{}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	defer cancel()
 
-	pongServer, pongClient, err := hacket.New("udp", "localhost:9000", options...)
+	pongServer, pongClient, err := hacket.New("udp", "localhost:9000")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func main() {
 		WithPacketType(ping).
 		Build()
 
-	pingServer, _, err := hacket.New("udp", "localhost:9001", options...)
+	pingServer, _, err := hacket.New("udp", "localhost:9001")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,5 +97,4 @@ func main() {
 	}
 
 	<-ctx.Done()
-	cancel()
 }
