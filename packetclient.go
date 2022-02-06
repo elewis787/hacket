@@ -19,7 +19,7 @@ type udpPacketClientImpl struct {
 }
 
 // NewUDPPacketClient creates a new UDP packet client
-func newUDPPacketClient(conn *net.UDPConn, options *packetOptions) PacketClient {
+func newUDPPacketClient(conn *net.UDPConn, options *packetOptions) *udpPacketClientImpl {
 	return &udpPacketClientImpl{
 		conn:    conn,
 		options: options,
